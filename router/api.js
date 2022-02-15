@@ -15,18 +15,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-/* const corsOptions = {
-	origin: 'http://localhost:8080',
-	credentials: true,
-	maxAge: '1728000'
-	//这一项是为了跨域专门设置的
-} 
-router.use(cors(corsOptions))*/
-
-// router.get("/", (req, res) => {
-// 	res.render("index")
-// })
-
 //上传单图
 router.post("/upload", upload.single('file'), (req, res) => {
 	res.status(200).send({
