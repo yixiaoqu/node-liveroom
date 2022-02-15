@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, user-scalable=no">
+	<title>吃了么聊天室</title>
+	<link rel="stylesheet" href="//cdn.bootcss.com/weui/0.4.3/style/weui.min.css">
+	<link rel="stylesheet" href="//cdn.bootcss.com/jquery-weui/0.8.3/css/jquery-weui.min.css">
+	<link rel="stylesheet" href="/public/style.css">
+</head>
+
+<body>
+	<div id="app">
+		<div class="roombox">
+			<div class="header">吃了么聊天室({{personNum}})</div>
+			<div class="uname" v-if="showIpt">
+				<div class="ipt">
+					<input type="text" placeholder="请输入昵称" v-model="nickname" class="ipt-name" />
+				</div>
+				<button @click="ok">确认</button>
+			</div>
+			<div class="list" ref="chatView">
+				<div class="itm" v-for="(item, index) in chatList">
+					<div class="chatBox" v-if="item.type=='chat'">
+						<div class="item">
+							<p class="nameTime">
+								<span class="name" :class="{my: item.name === nickname}">{{item.name}}</span>
+								<span class="time">{{ transTime(item.time) }}</span>
+							</p>
+							<p class="txt">{{ item.content }}</p>
+						</div>
+					</div>
+					<div class="chatBox" v-else-if="item.type==='enter'">
+						<div class="item2">
+							<span class="tag">系统</span>
+							<span class="text">{{ item.content }}加入群聊</span>
+						</div>
+					</div>
+					<div class="chatBox" v-else-if="item.type==='out'">
+						<div class="item2">
+							<span class="tag">系统</span>
+							<span class="text">{{ item.content }}离开群聊</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="inputbox">
+				<div class="ipt">
+					<input type="text" v-model="sendTxt" @keyup.enter.prevent="sendFun($event)" class="ipt-text"/>
+				</div>
+				<button @click="sendInfo">发送</button>
+			</div>
+		</div>
+	</div>
+	
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+	<script src="//cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+	<script src="//cdn.bootcss.com/jquery-weui/0.8.3/js/jquery-weui.min.js"></script>
+	<script type="text/javascript">
+		new Vue({
+			el:'#app',
+			data: {
+				ws:"",
+				personNum: 0,
+				nickname:'',
+				showIpt: true,
+				chatList:[],
+				sendTxt:'',
+			},
+			methods:{
+				ok(){
+					if(!this.nickname){
+						$.toast("请先输入昵称", "text");
+						return;
+					}
+					this.init()
+					this.showIpt = false
+				},
+				sendFun(e){
+					var keyCode = window.event ? e.keyCode : e.which;
+					if (keyCode == 13) {
+						this.sendInfo()
+					}
+				},
+				sendInfo(){
+					if(!this.nickname){
+						$.toast("请先输入昵称", "text");
+						return;
+					}
+					if (!this.sendTxt) {
+						$.toast("请输入内容", "text");
+						return;
+					}
+					if(this.sendTxt.length>=50){
+						$.toast("不能多余50字", "text");
+						return;
+					}
+					let obj = {
+						type:'chat',
+						data:this.sendTxt
+					}
+					this.ws.send(JSON.stringify(obj))
+					this.sendTxt = "";
+					let scrollH = this.$refs.chatView.scrollHeight;
+					setTimeout(() => {
+						this.$refs.chatView.scrollTop = scrollH;
+					}, 300);
+				},
+				init(){
+					this.ws = new WebSocket("ws://192.168.0.205:8101");
+					this.ws.onopen = e =>{
+						let obj = {
+							type:'enter',
+							data: this.nickname
+						}
+						this.ws.send(JSON.stringify(obj))
+					}
+					this.ws.onmessage = e => {
+						let data = JSON.parse(e.data);
+						this.wsType(data);
+					};
+				},
+				//创建聊天和系统消息
+				createChatMsg(data) {
+					//聊天信息最多显示100条
+					if (this.chatList.length > 50) {
+						this.chatList.shift();
+						this.chatList.push({
+							type: data.type,
+							name: data.nickname,
+							time: data.time,
+							content: data.content
+						});
+					} else {
+						this.chatList.push({
+							type: data.type,
+							name: data.nickname,
+							time: data.time,
+							content: data.content
+						});
+					}
+					let scrollH = this.$refs.chatView.scrollHeight;
+					setTimeout(() => {
+						this.$refs.chatView.scrollTop = scrollH;
+					}, 100);
+				},
+				wsType(data){
+					let that = this;
+					let type = data.type;
+					switch (type) {
+						case "enter":
+							that.createChatMsg(data);
+							break;
+						case "chat":
+							that.createChatMsg(data);
+							break;
+						case "num":
+							console.log("num");
+							that.personNum = data.data.num
+							break;
+						case "out":
+							that.createChatMsg(data);
+							break;
+						default:
+							console.log("其他类型");
+							break;
+					}
+				},
+				//时间转化
+				transTime(time) {
+					let newTime = new Date(time * 1000);
+					let fullYear = newTime.getFullYear();
+					let month = newTime.getMonth() + 1;
+					let date = newTime.getDate();
+					let hour = newTime.getHours();
+					let minutes = newTime.getMinutes();
+					let second = newTime.getSeconds();
+					if (month < 10) {
+						month = "0" + month;
+					}
+					if (date < 10) {
+						date = "0" + date;
+					}
+					if (hour < 10) {
+						hour = "0" + hour;
+					}
+					if (minutes < 10) {
+						minutes = "0" + minutes;
+					}
+					if (second < 10) {
+						second = "0" + second;
+					}
+					return `${month}-${date} ${hour}:${minutes}:${second}`;
+				}
+			}
+		})
+		
+
+		
+	</script>
+</body>
+
+</html>

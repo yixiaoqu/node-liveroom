@@ -1,0 +1,150 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body,html{
+    width: 100%;
+    height: 100%;
+    background-color: #999;
+}
+#app{
+    width: 100%;
+    height: 100%;
+}
+.roombox{
+    position: relative;
+    width: 600px;
+    height: 100%;
+    background-color: #fff;
+    margin: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+input{
+    border: 0;
+	outline: none;
+    font-size: 24px;
+}
+button{
+    font-size: 24px;
+}
+.header{
+    height: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 25px;
+    color: #333;
+    border-bottom: 1px solid #999;
+    box-sizing: border-box;
+    line-height: 50px;
+}
+.list{
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    margin: auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.itm{
+    margin-bottom: 10px;
+}
+.item .nameTime{
+    font-size: 0;
+    color: #999;
+}
+.item .nameTime .name{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px;
+    margin-right: 10px;
+}
+.item .nameTime .name.my{
+    color: red;
+}
+.item .nameTime .time{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px;
+}
+.item .txt{
+    font-size: 18px;
+    line-height: 25px;
+}
+.item2{
+    font-size: 0;
+}
+.item2 .tag{
+    display: inline-block;
+    vertical-align: middle;
+    background-color: red;
+    padding: 0 5px;
+    font-size: 16px;
+    margin-right: 10px;
+    color: #fff;
+}
+.item2 .text{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px;
+    color: blue;
+}
+.inputbox{
+    flex-shrink: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    border-top: 1px solid #999;
+}
+.inputbox .ipt{
+    flex: 1;
+}
+.inputbox input{
+    display: block;
+    width: 90%;
+    margin: auto;
+    height: 100%;
+    line-height: 50px;
+    border: none;
+    background-color: transparent;
+    display: block;
+    font-size: 22px;
+}
+.inputbox button{
+    flex-shrink: 0;
+    width: 100px;
+    height: 50px;
+}
+
+.uname{
+    flex-shrink: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    border-bottom: 1px solid #999;
+}
+.uname .ipt{
+    flex: 1;
+}
+.uname input{
+    display: block;
+    width: 90%;
+    margin: auto;
+    height: 100%;
+    line-height: 50px;
+    border: none;
+    background-color: transparent;
+    display: block;
+    font-size: 22px;
+}
+.uname button{
+    flex-shrink: 0;
+    width: 100px;
+    height: 50px;
+}
+@media screen and (max-width: 600px){
+    .roombox{
+        width: 100%;
+    }
+}
