@@ -8,7 +8,7 @@
 	<title>吃了么聊天室</title>
 	<link rel="stylesheet" href="//cdn.bootcss.com/weui/0.4.3/style/weui.min.css">
 	<link rel="stylesheet" href="//cdn.bootcss.com/jquery-weui/0.8.3/css/jquery-weui.min.css">
-	<link rel="stylesheet" href="/public/style.css">
+	<link rel="stylesheet" href="/public/css/style.css">
 </head>
 
 <body>
@@ -44,11 +44,26 @@
 							<span class="text">{{ item.content }}离开群聊</span>
 						</div>
 					</div>
+					<div class="chatBox" v-else-if="item.type==='img'">
+						<div class="item">
+							<p class="nameTime">
+								<span class="name" :class="{my: item.name === nickname}">{{item.name}}</span>
+								<span class="time">{{ transTime(item.time) }}</span>
+							</p>
+							<p class="img">
+								<img :src="item.content" alt="img">
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="inputbox">
 				<div class="ipt">
 					<input type="text" v-model="sendTxt" @keyup.enter.prevent="sendFun($event)" class="ipt-text"/>
+				</div>
+				<div class="uploadbox">
+					<div class="uoload">发图</div>
+					<input class="upload-btn" type="file" @change="upload($event)" accept="image/jpg,image/jpeg,image/png,image/gif" />
 				</div>
 				<button @click="sendInfo">发送</button>
 			</div>
@@ -157,8 +172,10 @@
 							that.createChatMsg(data);
 							break;
 						case "num":
-							console.log("num");
 							that.personNum = data.data.num
+							break;
+						case "img":
+							that.createChatMsg(data);
 							break;
 						case "out":
 							that.createChatMsg(data);
@@ -193,6 +210,31 @@
 						second = "0" + second;
 					}
 					return `${month}-${date} ${hour}:${minutes}:${second}`;
+				},
+				upload(e){
+					var that = this;
+					if(!this.nickname){
+						$.toast("请先输入昵称", "text");
+						$('.upload-btn').val('')
+						return;
+					}
+					let file = e.target.files[0];
+					let fd = new FormData();
+					fd.append("file", file);
+					$.ajax({
+						method:"POST",
+						url:'/api/upload',
+						contentType: false,
+						processData: false,
+						data:fd,
+						success(res){
+							let obj = {
+								type:'img',
+								data: res.data.imgUrl
+							}
+							that.ws.send(JSON.stringify(obj))
+						}
+					})
 				}
 			}
 		})

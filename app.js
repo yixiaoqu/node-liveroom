@@ -17,6 +17,8 @@ app.set('views', __dirname + '/views');
 //设置模板引擎是什么
 app.set('view engine', 'ejs');
 
+
+
 //设置跨域访问
 app.all('*', (req, res, next) => {
 	res.header("Access-Control-Allow-Origin", "*");
@@ -37,10 +39,11 @@ app.all('*', (req, res, next) => {
 //设置静态资源目录
 app.use('/public', express.static('public')); //将文件设置成静态
 
-app.use('/', (req, res) => {
+app.get('/', (req, res) => {
 	res.render("index")
 });
 
+app.use('/api', require('./router/api'));
 
 var httpServer = http.createServer(app);
 httpServer.listen(8082, () => {
@@ -52,6 +55,7 @@ const wsServer = ws.createServer((connect) => {
 	connect.on('text', (str) => {
 		let obj = JSON.parse(str);
 		//console.log(obj);
+		let nowTime = Date.parse(new Date())/1000;
 		switch (obj.type) {
 			case 'enter':
 				connect.nickname = obj.data;
@@ -69,8 +73,15 @@ const wsServer = ws.createServer((connect) => {
 					}
 				}));
 				break;
+			case 'img':
+				boardcast(JSON.stringify({
+					type: 'img',
+					nickname: connect.nickname,
+					time: nowTime,
+					content: obj.data
+				}));
+				break;
 			case 'chat':
-				let nowTime = Date.parse(new Date())/1000;
 				boardcast(JSON.stringify({
 					type: 'chat',
 					nickname: connect.nickname,
